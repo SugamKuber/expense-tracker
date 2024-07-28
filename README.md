@@ -23,7 +23,7 @@ JWT_SECRET=<long secret>
 - run `make restart` to restart all servers
 - run `make clean` to clean up logs saved
 
-4. Start in docker:
+4. Start in docker: (Avoid this, Improvements needed)
 
 - run `docker-compose build` to build images
 - run `docker-compose up` to start servers
