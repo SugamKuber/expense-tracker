@@ -28,21 +28,21 @@ type MyExpenses struct {
 	Expenses []MyExpense `json:"expenses"`
 }
 
-func createExcelForTrackAll(expenses []Expense, buffer *bytes.Buffer) error {
+func createExcel(headers []string, rows [][]interface{}, buffer *bytes.Buffer) error {
 	f := excelize.NewFile()
 	sheet := "Sheet1"
 	f.SetSheetName(f.GetSheetName(1), sheet)
 
-	headers := []string{"Name", "Total Expense"}
 	for i, header := range headers {
 		cell := fmt.Sprintf("%s1", string(rune('A'+i)))
 		f.SetCellValue(sheet, cell, header)
 	}
 
-	for i, expense := range expenses {
-		row := i + 2
-		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), expense.Name)
-		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), expense.TotalExpense)
+	for i, row := range rows {
+		for j, value := range row {
+			cell := fmt.Sprintf("%s%d", string(rune('A'+j)), i+2)
+			f.SetCellValue(sheet, cell, value)
+		}
 	}
 
 	if err := f.Write(buffer); err != nil {
@@ -51,27 +51,25 @@ func createExcelForTrackAll(expenses []Expense, buffer *bytes.Buffer) error {
 	return nil
 }
 
-func createExcelForTrackMe(expenses []MyExpense, buffer *bytes.Buffer) error {
-	f := excelize.NewFile()
-	sheet := "Sheet1"
-	f.SetSheetName(f.GetSheetName(1), sheet)
-
-	headers := []string{"Expense Name", "Group Amount", "Amount Owed", "Created At"}
-	for i, header := range headers {
-		cell := fmt.Sprintf("%s1", string(rune('A'+i)))
-		f.SetCellValue(sheet, cell, header)
-	}
-
+func createExcelForTrackAll(expenses []Expense, buffer *bytes.Buffer) error {
+	headers := []string{"Name", "Total Expense"}
+	rows := make([][]interface{}, len(expenses))
 	for i, expense := range expenses {
-		row := i + 2
-		f.SetCellValue(sheet, fmt.Sprintf("A%d", row), expense.ExpenseName)
-		f.SetCellValue(sheet, fmt.Sprintf("B%d", row), expense.TotalAmount)
-		f.SetCellValue(sheet, fmt.Sprintf("C%d", row), expense.AmountOwed)
-		f.SetCellValue(sheet, fmt.Sprintf("D%d", row), expense.CreatedAt.Format("2006-01-02 15:04"))
+		rows[i] = []interface{}{expense.Name, expense.TotalExpense}
 	}
+	return createExcel(headers, rows, buffer)
+}
 
-	if err := f.Write(buffer); err != nil {
-		return err
+func createExcelForTrackMe(expenses []MyExpense, buffer *bytes.Buffer) error {
+	headers := []string{"Expense Name", "Group Amount", "Amount Owed", "Created At"}
+	rows := make([][]interface{}, len(expenses))
+	for i, expense := range expenses {
+		rows[i] = []interface{}{
+			expense.ExpenseName,
+			expense.TotalAmount,
+			expense.AmountOwed,
+			expense.CreatedAt.Format("2006-01-02 15:04"),
+		}
 	}
-	return nil
+	return createExcel(headers, rows, buffer)
 }

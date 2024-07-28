@@ -6,13 +6,12 @@ import (
 )
 
 type User struct {
-	ID        int64  `json:"user_id"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
+	ID    int64  `json:"user_id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
-
-func GetUserByID(userID float64) (*User, error) {
+func GetUserByID(userID int64) (*User, error) {
 	dbConn, err := db.ConnectToDB(config.LoadConfig())
 	if err != nil {
 		return nil, err
