@@ -1,17 +1,17 @@
 package model
 
 import (
+	"errors"
 	"sync"
 	"time"
-	"errors"
 	"tracker/lib/config"
 	"tracker/lib/db"
 )
 
 type User struct {
-	ID        int64  `json:"user_id"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
+	ID    int64  `json:"user_id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
 func GetUserByID(userID float64) (*User, error) {
@@ -71,10 +71,10 @@ const (
 )
 
 type ExpenseRequest struct {
-	ExpenseName string       `json:"expense_name"`
-	TotalAmount float64      `json:"total_amount"`
+	ExpenseName  string        `json:"expense_name"`
+	TotalAmount  float64       `json:"total_amount"`
 	Participants []Participant `json:"participants"`
-	SplitMethod SplitMethod   `json:"split_method"` 
+	SplitMethod  SplitMethod   `json:"split_method"`
 }
 
 type Participant struct {
