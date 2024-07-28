@@ -24,3 +24,4 @@ go.work.sum
 # Other
 **.txt
 .env
+logs

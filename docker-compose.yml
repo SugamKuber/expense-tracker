@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  auth:
+    build:
+      context: ./auth
+    ports:
+      - "3000:3000"
+    networks:
+      - expense-network
+
+  file-manager:
+    build:
+      context: ./file-manager
+    ports:
+      - "3002:3002"
+    networks:
+      - expense-network
+
+  tracker:
+    build:
+      context: ./tracker
+    ports:
+      - "3001:3001"
+    networks:
+      - expense-network
+
+networks:
+  expense-network:
+    driver: bridge

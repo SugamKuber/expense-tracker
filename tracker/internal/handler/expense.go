@@ -18,6 +18,10 @@ func AddExpense(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString("User not found")
 	}
 
+	if err := model.ValidateAndCalculateAmounts(&expenseReq); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	expenseID, err := model.CreateExpenseWithParticipants(expenseReq.ExpenseName, expenseReq.TotalAmount, user.ID, expenseReq.Participants)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create expense with participants"})

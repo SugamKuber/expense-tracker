@@ -3,6 +3,7 @@ package model
 import (
 	"sync"
 	"time"
+	"errors"
 	"tracker/lib/config"
 	"tracker/lib/db"
 )
@@ -12,7 +13,6 @@ type User struct {
 	Email     string `json:"email"`
 	Name      string `json:"name"`
 }
-
 
 func GetUserByID(userID float64) (*User, error) {
 	dbConn, err := db.ConnectToDB(config.LoadConfig())
@@ -28,13 +28,6 @@ func GetUserByID(userID float64) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
-}
-
-type Expense struct {
-	ExpenseID   int64   `json:"expense_id"`
-	ExpenseName string  `json:"expense_name"`
-	TotalAmount float64 `json:"total_amount"`
-	CreatorID   int64   `json:"creator_id"`
 }
 
 type MyExpense struct {
@@ -56,21 +49,70 @@ type AllUserExpenses struct {
 	Expenses []AllUserExpense `json:"expenses"`
 }
 
+type Expense struct {
+	ExpenseID   int64   `json:"expense_id"`
+	ExpenseName string  `json:"expense_name"`
+	TotalAmount float64 `json:"total_amount"`
+	CreatorID   int64   `json:"creator_id"`
+}
+
 type ExpenseParticipant struct {
 	ExpenseID  int64   `json:"expense_id"`
 	UserID     int64   `json:"user_id"`
 	AmountOwed float64 `json:"amount_owed"`
 }
 
+type SplitMethod string
+
+const (
+	SplitEqual      SplitMethod = "equal"
+	SplitExact      SplitMethod = "exact"
+	SplitPercentage SplitMethod = "percentage"
+)
+
 type ExpenseRequest struct {
-	ExpenseName  string        `json:"expense_name"`
-	TotalAmount  float64       `json:"total_amount"`
+	ExpenseName string       `json:"expense_name"`
+	TotalAmount float64      `json:"total_amount"`
 	Participants []Participant `json:"participants"`
+	SplitMethod SplitMethod   `json:"split_method"` 
 }
 
 type Participant struct {
 	UserID     int64   `json:"user_id"`
-	AmountOwed float64 `json:"amount_owed"`
+	AmountOwed float64 `json:"amount_owed,omitempty"`
+	Percentage float64 `json:"percentage,omitempty"`
+}
+
+func ValidateAndCalculateAmounts(expenseReq *ExpenseRequest) error {
+	switch expenseReq.SplitMethod {
+	case SplitEqual:
+		equalAmount := expenseReq.TotalAmount / float64(len(expenseReq.Participants))
+		for i := range expenseReq.Participants {
+			expenseReq.Participants[i].AmountOwed = equalAmount
+		}
+	case SplitExact:
+		var total float64
+		for _, participant := range expenseReq.Participants {
+			total += participant.AmountOwed
+		}
+		if total != expenseReq.TotalAmount {
+			return errors.New("total amount does not match the sum of exact amounts")
+		}
+	case SplitPercentage:
+		var totalPercentage float64
+		for _, participant := range expenseReq.Participants {
+			totalPercentage += participant.Percentage
+		}
+		if totalPercentage != 100 {
+			return errors.New("percentages do not add up to 100")
+		}
+		for i := range expenseReq.Participants {
+			expenseReq.Participants[i].AmountOwed = (expenseReq.TotalAmount * expenseReq.Participants[i].Percentage) / 100
+		}
+	default:
+		return errors.New("invalid split method")
+	}
+	return nil
 }
 
 func CreateExpenseWithParticipants(expenseName string, totalAmount float64, creatorID int64, participants []Participant) (int64, error) {
@@ -88,11 +130,11 @@ func CreateExpenseWithParticipants(expenseName string, totalAmount float64, crea
 	}
 
 	var expenseID int64
-	err = tx.QueryRow(`
-		INSERT INTO expenses (expense_name, total_amount, creator_id)
+	err = tx.QueryRow(
+		`INSERT INTO expenses (expense_name, total_amount, creator_id)
 		VALUES ($1, $2, $3)
-		RETURNING expense_id
-	`, expenseName, totalAmount, creatorID).Scan(&expenseID)
+		RETURNING expense_id`,
+		expenseName, totalAmount, creatorID).Scan(&expenseID)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -105,10 +147,10 @@ func CreateExpenseWithParticipants(expenseName string, totalAmount float64, crea
 		wg.Add(1)
 		go func(participant Participant) {
 			defer wg.Done()
-			_, err := tx.Exec(`
-				INSERT INTO expense_tracker (expense_id, user_id, amount_owed)
-				VALUES ($1, $2, $3)
-			`, expenseID, participant.UserID, participant.AmountOwed)
+			_, err := tx.Exec(
+				`INSERT INTO expense_tracker (expense_id, user_id, amount_owed)
+				VALUES ($1, $2, $3)`,
+				expenseID, participant.UserID, participant.AmountOwed)
 			if err != nil {
 				errChan <- err
 			}
