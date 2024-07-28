@@ -1,8 +1,8 @@
-package handler
+package middleware
 
 import (
-    "auth/lib/model"
-    "auth/util"
+    "tracker/util"
+    "tracker/lib/model"
     "github.com/gofiber/fiber/v2"
     "net/http"
 )

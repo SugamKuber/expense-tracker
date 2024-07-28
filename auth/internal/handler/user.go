@@ -61,7 +61,7 @@ func CheckMeHandler(c *fiber.Ctx) error {
     }
 
     userResponse := map[string]interface{}{
-        "id":         user.ID,
+        "user_id":    user.ID,
         "email":      user.Email,
         "name":       user.Name,
         "mobile":     user.Mobile,

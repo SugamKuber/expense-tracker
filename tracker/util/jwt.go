@@ -2,7 +2,7 @@ package util
 
 import (
     "github.com/dgrijalva/jwt-go"
-    "auth/lib/config"
+    "tracker/lib/config"
     "time"
 )
 

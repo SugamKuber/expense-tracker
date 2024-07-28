@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID        int64  `json:"id"`
+	ID        int64  `json:"user_id"`
 	Email     string `json:"email"`
 	Name      string `json:"name"`
 	Mobile    string `json:"mobile"`
@@ -34,7 +34,7 @@ func GetUserByEmail(email string) (*User, error) {
 	}
 	defer dbConn.Close()
 
-	row := dbConn.QueryRow("SELECT id, email, name, mobile, password, created_at FROM users WHERE email = $1", email)
+	row := dbConn.QueryRow("SELECT user_id, email, name, mobile, password, created_at FROM users WHERE email = $1", email)
 	var user User
 	err = row.Scan(&user.ID, &user.Email, &user.Name, &user.Mobile, &user.Password, &user.CreatedAt)
 	if err != nil {
@@ -50,7 +50,7 @@ func UpdatePassword(userID int64, newPassword string) error {
 	}
 	defer dbConn.Close()
 
-	_, err = dbConn.Exec("UPDATE users SET password = $1 WHERE id = $2", newPassword, userID)
+	_, err = dbConn.Exec("UPDATE users SET password = $1 WHERE user_id = $2", newPassword, userID)
 	return err
 }
 
@@ -61,7 +61,7 @@ func GetUserByID(userID float64) (*User, error) {
 	}
 	defer dbConn.Close()
 
-	row := dbConn.QueryRow("SELECT id, email, name, mobile, password, created_at FROM users WHERE id = $1", userID)
+	row := dbConn.QueryRow("SELECT user_id, email, name, mobile, password, created_at FROM users WHERE user_id = $1", userID)
 	var user User
 	err = row.Scan(&user.ID, &user.Email, &user.Name, &user.Mobile, &user.Password, &user.CreatedAt)
 	if err != nil {

@@ -1,10 +1,10 @@
 package main
 
 import (
-    "auth/internal/handler"
-    "auth/internal/middleware"
-    "auth/lib/config"
-    "auth/lib/db"
+    "tracker/internal/handler"
+    "tracker/internal/middleware"
+    "tracker/lib/config"
+    "tracker/lib/db"
     "github.com/gofiber/fiber/v2"
     "github.com/joho/godotenv"
 )
@@ -30,13 +30,11 @@ func main() {
         panic("Failed to init database")
     }
 
-    app.Post("/signup", handler.SignupHandler)
-    app.Post("/login", handler.LoginHandler)
-
     app.Use(middleware.AuthMiddleware)
-    app.Get("/me", handler.CheckMeHandler)
-    app.Post("/change-password", handler.ChangePasswordHandler)
-    app.Post("/logout", handler.LogoutHandler)
+    app.Post("/add", handler.AddExpense)
+    app.Get("/track/me", handler.TrackMe)
+    app.Get("/track/all",handler.TrackAll)
+    app.Get("/track/all/admin", handler.TrackAllAdmin)    
 
-    app.Listen(":3000")
+    app.Listen(":3001")
 }
