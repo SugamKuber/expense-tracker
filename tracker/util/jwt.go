@@ -19,7 +19,7 @@ func GenerateJWT(userID int64) (string, error) {
 	return signedToken, nil
 }
 
-func ParseJWT(tokenStr string) (float64, error) {
+func ParseJWT(tokenStr string) (int64, error) {
 	cfg := config.LoadConfig()
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return []byte(cfg.JWT_SECRET), nil
@@ -31,5 +31,5 @@ func ParseJWT(tokenStr string) (float64, error) {
 	if !ok {
 		return 0, err
 	}
-	return claims["user_id"].(float64), nil
+	return claims["user_id"].(int64), nil
 }

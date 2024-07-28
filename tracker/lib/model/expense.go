@@ -1,34 +1,11 @@
 package model
 
 import (
-	"errors"
 	"sync"
 	"time"
 	"tracker/lib/config"
 	"tracker/lib/db"
 )
-
-type User struct {
-	ID    int64  `json:"user_id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
-func GetUserByID(userID float64) (*User, error) {
-	dbConn, err := db.ConnectToDB(config.LoadConfig())
-	if err != nil {
-		return nil, err
-	}
-	defer dbConn.Close()
-
-	row := dbConn.QueryRow("SELECT user_id, email, name FROM users WHERE user_id = $1", userID)
-	var user User
-	err = row.Scan(&user.ID, &user.Email, &user.Name)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
 
 type MyExpense struct {
 	ExpenseName string    `json:"expense_name"`
@@ -36,6 +13,7 @@ type MyExpense struct {
 	AmountOwed  float64   `json:"amount_owed"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
 type MyExpenses struct {
 	Expenses []MyExpense `json:"expenses"`
 }
@@ -62,61 +40,7 @@ type ExpenseParticipant struct {
 	AmountOwed float64 `json:"amount_owed"`
 }
 
-type SplitMethod string
-
-const (
-	SplitEqual      SplitMethod = "equal"
-	SplitExact      SplitMethod = "exact"
-	SplitPercentage SplitMethod = "percentage"
-)
-
-type ExpenseRequest struct {
-	ExpenseName  string        `json:"expense_name"`
-	TotalAmount  float64       `json:"total_amount"`
-	Participants []Participant `json:"participants"`
-	SplitMethod  SplitMethod   `json:"split_method"`
-}
-
-type Participant struct {
-	UserID     int64   `json:"user_id"`
-	AmountOwed float64 `json:"amount_owed,omitempty"`
-	Percentage float64 `json:"percentage,omitempty"`
-}
-
-func ValidateAndCalculateAmounts(expenseReq *ExpenseRequest) error {
-	switch expenseReq.SplitMethod {
-	case SplitEqual:
-		equalAmount := expenseReq.TotalAmount / float64(len(expenseReq.Participants))
-		for i := range expenseReq.Participants {
-			expenseReq.Participants[i].AmountOwed = equalAmount
-		}
-	case SplitExact:
-		var total float64
-		for _, participant := range expenseReq.Participants {
-			total += participant.AmountOwed
-		}
-		if total != expenseReq.TotalAmount {
-			return errors.New("total amount does not match the sum of exact amounts")
-		}
-	case SplitPercentage:
-		var totalPercentage float64
-		for _, participant := range expenseReq.Participants {
-			totalPercentage += participant.Percentage
-		}
-		if totalPercentage != 100 {
-			return errors.New("percentages do not add up to 100")
-		}
-		for i := range expenseReq.Participants {
-			expenseReq.Participants[i].AmountOwed = (expenseReq.TotalAmount * expenseReq.Participants[i].Percentage) / 100
-		}
-	default:
-		return errors.New("invalid split method")
-	}
-	return nil
-}
-
 func CreateExpenseWithParticipants(expenseName string, totalAmount float64, creatorID int64, participants []Participant) (int64, error) {
-
 	dbConn, err := db.ConnectToDB(config.LoadConfig())
 	if err != nil {
 		return 0, err
@@ -209,7 +133,6 @@ func GetMyExpenses(userID int64) (*MyExpenses, error) {
 	}
 
 	return &MyExpenses{expenses}, nil
-
 }
 
 func GetAllUsersExpenses(userID int64) (*AllUserExpenses, error) {
@@ -250,7 +173,6 @@ func GetAllUsersExpenses(userID int64) (*AllUserExpenses, error) {
 	}
 
 	return &AllUserExpenses{expenses}, nil
-
 }
 
 func GetAdminAllExpenses() (*AllUserExpenses, error) {
@@ -288,5 +210,4 @@ func GetAdminAllExpenses() (*AllUserExpenses, error) {
 	}
 
 	return &AllUserExpenses{expenses}, nil
-
 }
