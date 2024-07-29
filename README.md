@@ -33,6 +33,8 @@ JWT_SECRET=<long secret>
 
 **Api Guide**:
 
+Import `api.postman_collection.json` in postman, Provide TOKEN=<JWT TOKEN FROM LOGIN\> in Headers
+
 ***Auth***
 
 - ***Signup***: POST /signup - Register a new user.
@@ -64,7 +66,8 @@ split_method:exact
 ### Improvements & Updates needed
 - Handle the services intraction with gRPC or kafka
 - Better file structure & code re use for all services
-- Handle cloud deployment automatically and configure servers for scalablity
+- Handle cloud deployment automatically (pipelines & build) and configure servers for scalablity
+- Unit & Integration Tests
 
 ### Sample Architecture
 ![image](https://github.com/user-attachments/assets/d4ac0ffe-11c5-4aed-b7d8-f46a80683dc6)
@@ -83,6 +86,5 @@ Why different services ?
 Get All users expenses (related to the creator only, Not everyone in database)
 
 ![image](https://github.com/user-attachments/assets/338f522d-d9ca-471b-9c67-bba059bf002d)
-
 
 Get my expenses 
