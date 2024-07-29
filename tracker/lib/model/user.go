@@ -11,14 +11,14 @@ type User struct {
 	Name  string `json:"name"`
 }
 
-func GetUserByID(userID int64) (*User, error) {
+func GetUserByID(userID float64) (*User, error) {
 	dbConn, err := db.ConnectToDB(config.LoadConfig())
 	if err != nil {
 		return nil, err
 	}
 	defer dbConn.Close()
 
-	row := dbConn.QueryRow("SELECT user_id, email, name FROM users WHERE user_id = $1", userID)
+	row := dbConn.QueryRow("SELECT user_id, email, name  FROM users WHERE user_id = $1", userID)
 	var user User
 	err = row.Scan(&user.ID, &user.Email, &user.Name)
 	if err != nil {

@@ -11,7 +11,7 @@ type User struct {
 	Name  string `json:"name"`
 }
 
-func GetUserByID(userID int64) (*User, error) {
+func GetUserByID(userID float64) (*User, error) {
 	dbConn, err := db.ConnectToDB(config.LoadConfig())
 	if err != nil {
 		return nil, err
