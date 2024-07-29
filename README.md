@@ -58,6 +58,9 @@ split_method:exact
 - ***Download My Expense***: GET /download/me - Download the authenticated user's expense in excle.
 - ***Download All Expenses***: GET /download/all - Download all users' expense in excle.
 
+***Health***
+- - ***Get Health***: GET <services>/h - Check the health of services.
+
 ### Improvements & Updates needed
 - Handle the services intraction with gRPC or kafka
 - Better file structure & code re use for all services
@@ -66,3 +69,20 @@ split_method:exact
 ### Sample Architecture
 ![image](https://github.com/user-attachments/assets/d4ac0ffe-11c5-4aed-b7d8-f46a80683dc6)
 
+Why different services ?
+- User auth service is related to only user stuff, Future improvements like OTP verification, OAuth can be integrated easily, This can also be used for org's Other services where auth is needed 
+- Expense Tracker services has bit of more processing than user due to DB quries & validations, Which is also independent & can improve/scale easily in future  
+- File manager can take more computation than user auth & expense tracker, soo Its better to handle it in difference service, Will be helpful to handle file related updates in future as well
+
+
+### Sample excel screenshot 
+(ignore the user names and values)
+
+![image](https://github.com/user-attachments/assets/872e54e7-679e-4f68-ab06-0b046e92aa23)
+
+Get All users expenses (related to the creator only, Not everyone in database)
+
+![image](https://github.com/user-attachments/assets/338f522d-d9ca-471b-9c67-bba059bf002d)
+
+
+Get my expenses 
