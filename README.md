@@ -23,7 +23,7 @@ JWT_SECRET=<long secret>
 - run `make restart` to restart all servers
 - run `make clean` to clean up logs saved
 
-4. Start in docker:
+4. Start in docker: (Avoid this, Improvements needed)
 
 - run `docker-compose build` to build images
 - run `docker-compose up` to start servers
@@ -57,3 +57,12 @@ split_method:exact
 
 - ***Download My Expense***: GET /download/me - Download the authenticated user's expense in excle.
 - ***Download All Expenses***: GET /download/all - Download all users' expense in excle.
+
+### Improvements & Updates needed
+- Handle the services intraction with gRPC or kafka
+- Better file structure & code re use for all services
+- Handle cloud deployment automatically and configure servers for scalablity
+
+### Sample Architecture
+![image](https://github.com/user-attachments/assets/d4ac0ffe-11c5-4aed-b7d8-f46a80683dc6)
+
